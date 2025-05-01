@@ -113,12 +113,6 @@ Route::middleware(VendorMiddleware::class)->group(function () {
         ->name('admin.vendor.reservation_records');
     Route::get('admin/vendor/balance', [ReservationRecordController::class, 'view_balance'])
         ->name('admin.vendor.remainingbal');
-    Route::get('admin/vendor/calendar', [ReservationRecordController::class, 'view_reservation'])
-        ->name('admin.vendor.reservation_calendar');
-    Route::get('admin/vendor/reservation', [ReservationRecordController::class, 'view_history'])
-        ->name('admin.vendor.reservation_records');
-    Route::get('admin/vendor/balance', [ReservationRecordController::class, 'view_balance'])
-        ->name('admin.vendor.remainingbal');
     Route::post('/admin/vendor/process-payment', [PaymentController::class, 'processPayment'])
         ->name('admin.vendor.process-payment');
     Route::post('/admin/vendor/invalid-payment', [PaymentController::class, 'invalidPayment'])
