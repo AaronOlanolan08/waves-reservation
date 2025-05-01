@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,37 +14,47 @@
     rel="stylesheet">
   <title>All Reservation</title>
 </head>
+
 <body>
-   <!-- NAVIGATION BAR SECTION -->
+  <!-- NAVIGATION BAR SECTION -->
 
   <nav class="navbar">
     @php
-      $user = \App\Models\Admin::find(Auth::id());
+    $user = \App\Models\Admin::find(Auth::id());
 
-      $calendar_route = $user && $user->role === 'Manager'
-        ? route('admin.reservation.list')
-        : route('admin.vendor.reservation_calendar');
+    $calendar_route = $user && $user->role === 'Manager'
+      ? route('admin.reservation.list')
+      : route('admin.vendor.reservation_calendar');
 
-      $amenities_route = $user && $user->role === 'Manager'
-        ? route('admin.manager.amenities', ['type' => 'cottage'])
-        : route('admin.vendor.amenities', ['type' => 'cottage']);
-    @endphp
+    $amenities_route = $user && $user->role === 'Manager'
+      ? route('admin.manager.amenities', ['type' => 'cottage'])
+      : route('admin.vendor.amenities', ['type' => 'cottage']);
+  @endphp
 
     <div class="left-side-nav">
       <a href="{{ route('admin.dashboard') }}">
-      <button class="dashboard" id="dashboard">
-        <i class="material-icons nav-icons">dashboard</i> Dashboard
-      </button>
+        <button class="dashboard" id="dashboard">
+          <i class="material-icons nav-icons">dashboard</i> Dashboard
+        </button>
       </a>
       <a href="{{ $amenities_route }}">
-      <button class="ameneties" id="ameneties">
-        <i class="material-icons nav-icons">holiday_village</i> Amenities
-      </button>
+        <button class="ameneties" id="ameneties">
+          <i class="material-icons nav-icons">holiday_village</i> Amenities
+        </button>
       </a>
       <a href="{{ $calendar_route }}">
-      <button class="reservations" id="reservation">
-        <i class="material-icons nav-icons">date_range</i> Reservations
-      </button>
+        <button class="reservations" id="reservation">
+          <i class="material-icons nav-icons">date_range</i> Reservations
+        </button>
+      </a>
+    </div>
+    <div class="right-side-nav">
+      <a href="{{ route('admin.manager.profile') }}">
+        <button class="profile">
+          <i class="material-icons" style="font-size:45px; color: white">
+            account_circle
+          </i>
+        </button>
       </a>
     </div>
   </nav>
@@ -334,4 +345,5 @@
       </script>
 
 </body>
+
 </html>

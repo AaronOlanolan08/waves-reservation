@@ -34,11 +34,9 @@
                     <i class="fas fa-calendar-alt"></i>
                     <span>Reservation</span>
                 </a>
-                <!-- nag add kog button ani for acc balance -->
-
-                <a href="#"><i class="fas fa-wallet"></i> Account Balance</a>
             </div>
 
+            <!-- logout -->
             <form id="logoutForm" action="{{ route('logout') }}" method="POST" style="display: none;">
                 @csrf <!-- CSRF Token for security -->
             </form>
@@ -46,6 +44,12 @@
             <button id="logoutButton" class="logout">
                 <i class="fas fa-sign-out-alt"></i> Log Out
             </button>
+
+            <script>
+                document.getElementById('logoutButton').addEventListener('click', function () {
+                    document.getElementById('logoutForm').submit();
+                });
+            </script>
         </div>
 
         <!-- Main Content -->
@@ -53,34 +57,73 @@
             <div class="profile-section">
                 <h2>Edit Profile</h2>
 
-                <form id="profile-form" action="{{ route('profile.update', ['id' => $customer->id]) }}" method="POST">
+                <!-- Success Message (only shown if session has success) -->
+                @if(session('success'))
+                    <div class="alert alert-success" style="color: green; font-size: 18px;">
+                        <i class="fas fa-check-circle"></i> {{ session('success') }}
+                    </div>
+                @endif
+
+                <!-- Error Messages (e.g., email already taken) -->
+                @if($errors->any())
+                    <div class="alert alert-error" style="color: red; font-size: 18px;">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <form id="profile-form" action="{{ route('profile.update', ['id' => $customer->id]) }}" method="POST"
+                    onsubmit="return confirmEdit()">
                     @csrf
                     @method('PATCH')
 
                     <div class="form-group">
                         <label class="form-label">Name</label>
-                        <input type="text" name="name" class="form-input" value="{{ $customer->name }}">
+                        <input type="text" name="name" class="form-input" value="{{ old('name', $customer->name) }}">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Email</label>
-                        <input type="email" name="email" class="form-input" value="{{ $customer->email }}">
+                        <input type="email" name="email" class="form-input"
+                            value="{{ old('email', $customer->email) }}">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Contact No.</label>
-                        <input type="tel" name="number" class="form-input" value="{{ $customer->number }}">
+                        <input type="tel" name="number" class="form-input"
+                            value="{{ old('number', $customer->number) }}">
                     </div>
 
                     <div class="form-actions">
-                        <button type="button" class="btn btn-cancel">Cancel</button>
+                        <button type="button" class="btn btn-cancel" onclick="cancelEdit()">Cancel</button>
                         <button type="submit" class="btn btn-save">Save</button>
                     </div>
                 </form>
-
             </div>
         </div>
     </div>
+
+    <script>
+        // Confirmation before editing
+        function confirmEdit() {
+            const name = document.querySelector('input[name="name"]').value;
+            const email = document.querySelector('input[name="email"]').value;
+            const number = document.querySelector('input[name="number"]').value;
+
+            const confirmed = confirm("Are you sure you want to save the changes?");
+            return confirmed;
+        }
+
+        // Handle Cancel button
+        function cancelEdit() {
+            if (confirm("Are you sure you want to cancel the changes?")) {
+                window.location.href = "{{ route('customer.profile') }}"; // Redirect to the profile page
+            }
+        }
+    </script>
 </body>
 
 </html>

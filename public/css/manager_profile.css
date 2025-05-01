@@ -210,9 +210,11 @@ body, html {
     font: 600 20px poppins;
   }
   .name-container .edit-name, .edit-email, .edit-contact {
+    cursor: pointer;
     font: 400 18px poppins;
     color: darkblue;
   }
+  
   .name-container input, .email-container input, .contact-container input {
     text-align: center;
     padding: 6px;

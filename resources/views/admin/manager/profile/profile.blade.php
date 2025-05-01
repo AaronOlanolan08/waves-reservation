@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,9 +10,12 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet">
   <title>Manager's Profile</title>
 </head>
+
 <body>
 
   <div class="container">
@@ -23,9 +27,9 @@
         <div class="back-to-main">
           <i class="material-icons">arrow_back</i>
           <p>Back to main</p>
-      </div>
+        </div>
       </a>
-      
+
       <div class="profile">
         <div class="profile-icon">
           <i class="material-icons">account_circle</i>
@@ -77,7 +81,11 @@
 
   <!--- DIALOG SECTION -->
   <dialog class="edit-profile-dialog">
-    <div class="dialog-container">
+    <form method="POST" action="{{ route('admin.manager.profile.update', ['id' => $admin->id]) }}"
+      class="dialog-container">
+      @csrf
+      @method('PUT')
+      <input type="hidden" name="id" value="{{ $admin->id }}">
 
       <div class="icon-container">
         <i class="material-icons" onclick="closeEdit()">chevron_left</i>
@@ -85,56 +93,79 @@
 
       <div class="dialog-info">
         <div class="heading-container">
-          <p> Edit Profile</p><hr>
-        </div>
-        <div>
-          <div class="name-container">
-            <p class="name">Name</p>
-            <input value="Hector Culaste">
-            <p class="edit-name">Edit</p>
-          </div>
+          <p>Edit Profile</p>
           <hr>
         </div>
 
-        <div>
-          <div class="email-container">
-            <p class="email">Email</p>
-            <input value="Hectorc@gmail.com">
-            <p class="edit-email">Edit</p>
+        <!-- Name -->
+        <div class="name-container">
+          <p class="name">Name</p>
+          <input type="text" name="name" value="{{ $admin->name }}" disabled>
+          <p class="edit-name" onclick="enableField(this)">Edit</p>
+          <div class="field-buttons" style="display: none;">
+            <button type="button" onclick="cancelEdit(this)">Cancel</button>
+            <button type="submit">Save</button>
           </div>
-          <hr>
         </div>
+        <hr>
 
-        <div>
-          <div class="contact-container">
-            <p class="contact">Contact</p>
-            <input value="09204567334">
-            <p class="edit-contact">Edit</p>
+        <!-- Email -->
+        <div class="email-container">
+          <p class="email">Email</p>
+          <input type="email" name="email" value="{{ $admin->email }}" disabled>
+          <p class="edit-email" onclick="enableField(this)">Edit</p>
+          <div class="field-buttons" style="display: none;">
+            <button type="button" onclick="cancelEdit(this)">Cancel</button>
+            <button type="submit">Save</button>
           </div>
-          <hr>
+        </div>
+        <hr>
+
+        <!-- Contact -->
+        <div class="contact-container">
+          <p class="contact">Contact</p>
+          <input type="text" name="number" value="{{ $admin->number }}" disabled>
+          <p class="edit-contact" onclick="enableField(this)">Edit</p>
+          <div class="field-buttons" style="display: none;">
+            <button type="button" onclick="cancelEdit(this)">Cancel</button>
+            <button type="submit">Save</button>
+          </div>
+        </div>
+        <hr>
+
+
+        <!-- Save & Cancel buttons -->
+        <div class="save-cancel-buttons" style="display: none; text-align: right; margin-top: 10px;">
+          <button type="button" onclick="cancelEdit()">Cancel</button>
+          <button type="submit" onclick="enableAllFields()">Save</button>
         </div>
       </div>
-
-    </div>
+    </form>
   </dialog>
 
+
+
   <!---------- Modal/Dialog Box ----------->
-      
+
   <dialog class="logout-modal">
     <div class="modal-wrapper">
       <p class="modal-heading">Log Out?</p>
-    <hr style="width: 100%">
-    
-    <p class="modal-text">
-      Are you sure you want to logout? You'll need
-      to sign in again to acess your account.
-    </p>
+      <hr style="width: 100%">
+
+      <p class="modal-text">
+        Are you sure you want to logout? You'll need
+        to sign in again to acess your account.
+      </p>
       <div class="modal-button-wrapper">
         <button class="cancel-button" onclick="cancelLogout()">Cancel</button>
-        <button class="confirm-button">Confirm</button>
-     </div>
+        <button class="confirm-button" onclick="confirmLogout()">Confirm</button>
+      </div>
     </div>
   </dialog>
+
+  <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+    @csrf
+  </form>
 
   <!--- SCRIPT SECTION -->
 
@@ -160,10 +191,37 @@
       logoutModal.close();
     }
 
+    function confirmLogout() {
+      document.getElementById('logout-form').submit();
+    }
+
+    function enableField(editBtn) {
+      const input = editBtn.previousElementSibling;
+      input.disabled = false;
+      input.focus();
+
+      document.querySelector('.save-cancel-buttons').style.display = 'block';
+    }
+
+    function cancelEdit() {
+      // Reset all fields and hide buttons
+      const form = document.querySelector('.edit-profile-dialog form');
+      form.reset();
+      document.querySelectorAll('.edit-profile-dialog input').forEach(input => input.disabled = true);
+      document.querySelector('.save-cancel-buttons').style.display = 'none';
+    }
+
+    function enableAllFields() {
+      document.querySelectorAll('.edit-profile-dialog input').forEach(input => {
+        input.disabled = false;
+      });
+    }
+
   </script>
 
 
 
 
 </body>
+
 </html>

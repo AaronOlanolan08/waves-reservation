@@ -72,10 +72,7 @@
                             <i class="fas fa-phone"></i>
                             <span>{{ $customer->number }}</span>
                         </div>
-                        <div class="detail-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>{{ $customer->address ?? 'No address provided' }}</span>
-                        </div>
+
                     </div>
                 </div>
                 <div class="profile-actions">

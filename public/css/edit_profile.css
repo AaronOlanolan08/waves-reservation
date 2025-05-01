@@ -245,3 +245,23 @@ body {
     background-color: rgba(49, 105, 109, 0.751);
     color: white;
 }
+
+.notification {
+    background-color: #4CAF50;
+    color: white;
+    padding: 15px;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    border-radius: 5px;
+    z-index: 1000;
+    display: none;
+}
+
+.notification.success {
+    background-color: #4CAF50;
+}
+
+.notification.show {
+    display: block;
+}

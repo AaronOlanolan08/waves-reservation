@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use App\Models\DownPayment;
+use App\Models\Reservation;
 
 class AdminDashboardController extends Controller
 {
@@ -54,5 +56,54 @@ class AdminDashboardController extends Controller
     public function create_admin()
     {
         return view('admin.manager.profile.create_admin');
+    }
+
+    public function view_all_reservations()
+    {
+        $manager = auth('admin')->user();
+
+        $reservations = Reservation::with([
+            'customer',
+            'reservedAmenities.amenity',
+            'bill.balance',
+            'downPayment'
+        ])
+            ->get();
+
+        $reservations->each(function ($reservation) {
+            $bill = $reservation->bill;
+
+            $grandTotal = optional($bill)->grand_total ?? 0;
+
+            // Sum only verified down payments
+            $paidAmount = DownPayment::where('res_num', $reservation->id)
+                ->where('status', 'verified')
+                ->sum('amount');
+
+            $reservation->paidAmount = $paidAmount;
+            $reservation->grandTotal = $grandTotal;
+
+            $reservation->balance = $grandTotal - $paidAmount;
+        });
+
+        // Group reservations
+        $pendingReservations = $reservations->where('status', 'pending');
+        $cancelledReservations = $reservations->where('status', 'cancelled');
+        $completedReservations = $reservations->where('status', 'completed');
+        $verifiedReservations = $reservations->where('status', 'verified');
+        $invalidReservations = $reservations->where('status', 'invalid');
+
+        $currentReservations = $pendingReservations->merge($verifiedReservations);
+
+        return view('admin.manager.reservations.all_reservations', compact(
+            'pendingReservations',
+            'cancelledReservations',
+            'completedReservations',
+            'verifiedReservations',
+            'invalidReservations',
+            'currentReservations',
+            'reservations'
+        ));
+
     }
 }

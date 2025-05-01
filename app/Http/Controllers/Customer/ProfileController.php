@@ -28,13 +28,16 @@ class ProfileController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'number' => 'required|regex:/^[0-9]{11}$/',
-            'email' => 'required|string|email|max:255',
+            'email' => 'required|string|email|max:255|unique:customers,email,' . $customer->id, 
         ]);
 
+        // Update the customer profile
         $customer->update($request->only(['name', 'number', 'email']));
 
-        return redirect()->back()->with('success', 'Profile updated successfully!');
+        // Flash success message
+        return redirect()->route('customer.profile')->with('success', 'Profile updated successfully!');
     }
+
 
 
 }

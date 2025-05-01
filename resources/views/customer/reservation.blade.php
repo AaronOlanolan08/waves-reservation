@@ -52,29 +52,30 @@
                 <div class="start-end-time-container">
                     <div>
                         <label for="startTime">Start Time</label>
-                        <input type="time" id="startTime" name="startTime" required>
+                        <input type="time" id="startTime" name="startTime" required min="07:00" max="21:00">
                     </div>
                     <div>
                         <label for="endTime">End Time</label>
-                        <input type="time" id="endTime" name="endTime" required>
+                        <input type="time" id="endTime" name="endTime" required min="07:00" max="21:00">
                     </div>
                 </div>
 
-                <!-- Cottage selection with checkboxes -->
-                <div class="custom-dropdown" id="cottage-dropdown">
-                    <button type="button" class="dropdown-btn">Cottage</button>
-                    <div class="dropdown-menu" id="cottage-menu">
-                        @foreach ($cottages as $cottage)
-                            @if ($cottage->is_active)
-                                <label for="cottage-{{ $cottage->id }}">
-                                    <input class="form-check-input p-2" type="checkbox" name="cottages[]"
-                                        value="{{ $cottage->id }}" id="cottage-{{ $cottage->id }}">
-                                    {{ $cottage->name }} - ₱{{ number_format($cottage->price, 2) }}
-                                </label>
-                            @endif
-                        @endforeach
+
+                    <!-- Cottage selection with checkboxes -->
+                    <div class="custom-dropdown" id="cottage-dropdown">
+                        <button type="button" class="dropdown-btn">Cottage</button>
+                        <div class="dropdown-menu" id="cottage-menu">
+                            @foreach ($cottages as $cottage)
+                                @if ($cottage->is_active)
+                                    <label for="cottage-{{ $cottage->id }}">
+                                        <input class="form-check-input p-2" type="checkbox" name="cottages[]"
+                                            value="{{ $cottage->id }}" id="cottage-{{ $cottage->id }}">
+                                        {{ $cottage->name }} - ₱{{ number_format($cottage->price, 2) }}
+                                    </label>
+                                @endif
+                            @endforeach
+                        </div>
                     </div>
-                </div>
 
                 <!-- Table selection with checkboxes -->
                 <div class="custom-dropdown" id="table-dropdown">
@@ -91,6 +92,10 @@
                     </div>
                 </div>
 
+                <!-- Error Message Container -->
+                <div id="error-message" style="color: red; font-size: 14px; display: none; margin-bottom: 10px;">
+                    Please select at least one Cottage or Table before submitting.
+                </div>
 
                 <!-- Submit button -->
                 <div class="button-wrapper">
@@ -107,20 +112,35 @@
         </div>
     </section>
 
-    <script>
+<script>
     // Validation before form submission
     function validateSelection() {
         const cottages = document.querySelectorAll('input[name="cottages[]"]:checked');
         const tables = document.querySelectorAll('input[name="tables[]"]:checked');
         const cottageChecked = cottages.length > 0;
         const tableChecked = tables.length > 0;
-
-        if (!cottageChecked && !tableChecked) {
-            alert("Please select at least one Cottage or Table before submitting.");
+        
+        const startTime = document.getElementById("startTime").value;
+        const endTime = document.getElementById("endTime").value;
+        const errorMessageContainer = document.getElementById("error-message");
+        
+        // Validate if end time is after start time
+        if (endTime <= startTime && endTime !== "") {
+            alert("End time must be later than the start time.");
             return false; // Prevent form submission
         }
+
+        // If neither cottage nor table is selected
+        if (!cottageChecked && !tableChecked) {
+            errorMessageContainer.style.display = "block"; // Show the error message
+            return false; // Prevent form submission
+        }
+
+        // If either cottage or table is selected, hide the error message
+        errorMessageContainer.style.display = "none";
         return true; // Allow form submission
     }
+
     document.addEventListener("DOMContentLoaded", function () {
         // Set the minimum date to today for the date input field
         let today = new Date().toISOString().split('T')[0];
@@ -206,9 +226,9 @@
                 cottages.forEach(cottage => {
                     let label = document.createElement('label');
                     label.innerHTML = `
-                        <input type="checkbox" name="cottages[]" value="${cottage.id}" id="cottage-${cottage.id}">
-                        ${cottage.name} - ₱${cottage.price.toFixed(2)}
-                    `;
+                    <input type="checkbox" name="cottages[]" value="${cottage.id}" id="cottage-${cottage.id}">
+                    ${cottage.name} - ₱${cottage.price.toFixed(2)}
+                `;
                     cottageMenu.appendChild(label);
                 });
             } else {
@@ -223,9 +243,9 @@
                 tables.forEach(table => {
                     let label = document.createElement('label');
                     label.innerHTML = `
-                        <input type="checkbox" name="tables[]" value="${table.id}" id="table-${table.id}">
-                        ${table.name} - ₱${table.price.toFixed(2)}
-                    `;
+                    <input type="checkbox" name="tables[]" value="${table.id}" id="table-${table.id}">
+                    ${table.name} - ₱${table.price.toFixed(2)}
+                `;
                     tableMenu.appendChild(label);
                 });
             } else {
@@ -240,12 +260,12 @@
 
         // Helper function to get the selected start time
         function getStartTime() {
-            return document.getElementById("startTime").value || "00:00";
+            return document.getElementById("startTime").value || "07:00";
         }
 
         // Helper function to get the selected end time
         function getEndTime() {
-            return document.getElementById("endTime").value || "23:59";
+            return document.getElementById("endTime").value || "21:00";
         }
 
         // Image Carousel
@@ -276,9 +296,9 @@
 
         updateImage();
     });
+</script>
 
-
-    </script>
 
 </body>
+
 </html>

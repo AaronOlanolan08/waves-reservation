@@ -47,6 +47,15 @@
 		</button>
 		</a>
 	</div>
+	<div class="right-side-nav">
+      <a href="{{ route('admin.manager.profile') }}">
+        <button class="profile">
+          <i class="material-icons" style="font-size:45px; color: white">
+            account_circle
+          </i>
+        </button>
+      </a>
+    </div>
 
   </nav>
 
@@ -92,7 +101,6 @@
   
           <div class="flex justify-end space-x-2 pt-2 border-t border-gray-200">
             <button id="closeReservationModal" class="rounded-md border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-100">Close</button>
-            <button id="verifyBtn" class="rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700">Verify</button>
           </div>
       </div>
     </div>
@@ -475,11 +483,6 @@
 						document.getElementById('modalTotal').textContent = eventProps.total || '0';
 						document.getElementById('modalDownpayment').textContent = eventProps.downpayment || '0';
 
-						// Store reservation ID
-						const verifyBtn = document.getElementById('verifyBtn');
-						verifyBtn.setAttribute('data-reservation-id', info.event.id);
-						verifyBtn.setAttribute('data-event-props', JSON.stringify(eventProps));
-
 						// Open modal
 						document.getElementById('reservationModalBackdrop').classList.remove("opacity-0", "pointer-events-none");
 				}
@@ -565,132 +568,6 @@
 
 			document.getElementById('closeVerifyModal').addEventListener('click', () => {
 				document.getElementById('verifyModalBackdrop').classList.add("opacity-0", "pointer-events-none");
-			});
-
-			// Verify button handler
-			document.getElementById('verifyBtn').addEventListener('click', function (e) {
-				e.preventDefault();
-
-				// Close reservation modal
-				document.getElementById('reservationModalBackdrop').classList.add("opacity-0", "pointer-events-none");
-
-				// Get stored event data
-				const eventProps = JSON.parse(this.getAttribute('data-event-props') || "{}");
-				const reservationId = this.getAttribute('data-reservation-id');
-				const billId = eventProps.bill_id || ""; 
-				const dp_id = eventProps.dp_id || "";
-				const dpIdInput = document.getElementById('dp_id');
-
-				// Populate verify modal
-				document.getElementById('reservationId').value = reservationId;
-				document.getElementById('billId').value = billId;
-				document.getElementById('dp_id').value = dp_id;
-				document.getElementById('verifyCustomerName').textContent = eventProps.customer_name || "Unknown";
-				document.getElementById('modalPhoneNumber').textContent = eventProps.phone_number || "N/A";
-				document.getElementById('verifyReferenceNumber').textContent = eventProps.ref_num || "N/A";
-
-				// Status display
-				const downpaymentStatusEl = document.getElementById('dpStatus');
-				const downpaymentStatus = eventProps.downpayment_status || "pending";
-				const pendingMessage = document.getElementById('pendingMessage');
-				const invalidMessage = document.getElementById('invalidMessage');
-
-				downpaymentStatusEl.textContent = downpaymentStatus.charAt(0).toUpperCase() + downpaymentStatus.slice(1);
-				downpaymentStatusEl.className = `text-sm font-bold px-2 py-1 rounded-md ${
-						downpaymentStatus === "verified" ? "bg-green-100 text-green-700" :
-						downpaymentStatus === "invalid" ? "bg-red-100 text-red-700" :
-						"bg-yellow-100 text-yellow-700"
-				}`;
-				
-				// Show/hide messages based on status
-				pendingMessage.classList.add('hidden');
-				invalidMessage.classList.add('hidden');
-				submitInvalidBtn.classList.remove('hidden');
-				submitVerifyBtn.classList.remove('hidden');
-				inputPayment.classList.remove('hidden');
-
-				if (downpaymentStatus === 'pending') {
-						pendingMessage.classList.remove('hidden');
-				} else if (downpaymentStatus === 'invalid') {
-						invalidMessage.classList.remove('hidden');
-				} else if (downpaymentStatus === 'verified') {
-						submitInvalidBtn.classList.add('hidden');
-						submitVerifyBtn.classList.add('hidden');
-						inputPayment.classList.add('hidden');
-				}
-
-				// Populate amenities
-				const verifyAmenitiesList = document.getElementById('verifyAmenities');
-				verifyAmenitiesList.innerHTML = "";
-				if (Array.isArray(eventProps.amenities) && eventProps.amenities.length > 0) {
-						eventProps.amenities.forEach(amenity => {
-							const li = document.createElement('li');
-							li.className = "flex justify-between";
-							li.innerHTML = `<span>${amenity.name || "Unknown"}</span><span class="font-bold">₱${parseFloat(amenity.price || 0).toFixed(2)}</span>`;
-							verifyAmenitiesList.appendChild(li);
-						});
-				} else {
-						verifyAmenitiesList.innerHTML = "<li class='text-gray-600'>No amenities reserved</li>";
-				}
-
-				// Financial handling
-				const grandTotal = parseFloat(eventProps.total) || 0;
-				const paidAmount = parseFloat(eventProps.paid_amount) || 0;
-				const downPaymentAmount = grandTotal * 0.5;
-				const balanceAmount = grandTotal - paidAmount;
-				document.getElementById('verifyTotal').textContent = `₱${grandTotal.toFixed(2)}`;
-				document.getElementById('verifyDownpayment').textContent = `₱${downPaymentAmount.toFixed(2)}`;
-				document.getElementById('balanceAmount').textContent = `₱${balanceAmount.toFixed(2)}`;
-				document.getElementById('paidAmount').textContent = `₱${paidAmount.toFixed(2)}`;
-
-				
-				
-				const balanceDiv = document.getElementById('balanceContainer'); 
-				const paidDiv = document.getElementById('paidContainer'); 
-				const downpaymentDiv = document.getElementById('downPaymentContainer');
-				if (paidAmount >= 0) {
-						balanceDiv.classList.remove('hidden');
-				} else {
-						balanceDiv.classList.add('hidden');
-				}
-				if (paidAmount === 0) {
-						paidDiv.classList.add('hidden');
-				} else {
-						paidDiv.classList.remove('hidden');
-				}
-
-				if (paidAmount >= grandTotal) {
-						downpaymentDiv.classList.add('hidden');
-				} else {
-						downpaymentDiv.classList.remove('hidden');
-				}
-
-				// Handle image
-				const verifyModalImage = document.getElementById('verifyImage');
-				const noImageMessage = document.getElementById('noImageMessage');
-
-				const downpaymentImage = eventProps.downpayment_image?.trim();
-
-				// Ensure the image source is set only if the value is valid and not "N/A"
-				if (downpaymentImage && downpaymentImage !== null) {
-						verifyModalImage.src = downpaymentImage;
-						verifyModalImage.classList.remove('hidden');
-						noImageMessage.classList.add('hidden');
-				} else {
-						verifyModalImage.removeAttribute('src');
-						verifyModalImage.classList.add('hidden');
-						noImageMessage.classList.remove('hidden');
-				}
-
-				// Open verify modal
-				document.getElementById('verifyModalBackdrop').classList.remove("opacity-0", "pointer-events-none");
-
-				// Reset Alpine component form state when modal opens
-				const alpineComponentRoot = document.querySelector('#verifyModalBackdrop');
-
-				if (alpineComponentRoot && alpineComponentRoot.__x) {
-						alpineComponentRoot.__x.$data.resetState();
-				}
 			});
 
 			// Get the image element that opens the fullscreen modal

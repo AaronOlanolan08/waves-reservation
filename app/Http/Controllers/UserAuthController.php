@@ -23,20 +23,18 @@ class UserAuthController extends Controller
 
     public function store(Request $request)
     {
-        // Validate the incoming request
         $request->validate([
             'email' => 'required|email',
-            'password' => 'required',
+            'password' => 'required|min:8',
         ]);
 
-        // First, check in the Admins table
         if ($this->attemptLogin(Admin::class, $request)) {
-            return redirect()->intended('admin/dashboard'); // Redirect to the admin dashboard
+            return redirect()->intended('admin/dashboard'); 
         }
 
         // If not found, check in the Customers table
         if ($this->attemptLogin(Customer::class, $request)) {
-            return redirect()->intended('customer/reservation'); // Redirect to the customer dashboard
+            return redirect()->intended('customer/reservation'); 
         }
 
         return back()->withErrors([
@@ -44,10 +42,8 @@ class UserAuthController extends Controller
         ]);
     }
 
-    // Helper method to attempt login with a specific model
     private function attemptLogin($model, $request)
     {
-        // Find the user by email
         $user = $model::where('email', $request->email)->first();
 
         if ($user && \Hash::check($request->password, $user->password)) {

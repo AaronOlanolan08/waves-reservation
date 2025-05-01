@@ -168,27 +168,53 @@ class ReservationController extends Controller
 
         $pendingReservationsWithDP = $customer->reservations()
             ->where('status', 'pending')
-            ->whereHas('downPayment') 
-            ->with(['reservedAmenities.amenity', 'downPayment']) 
+            ->whereHas('downPayment')
+            ->with(['reservedAmenities.amenity', 'downPayment'])
             ->get();
 
-        $pendingReservations = $allReservations->where('status', 'pending');
+        $pendingReservationsWithoutDP = $customer->reservations()
+            ->where('status', 'pending')
+            ->whereDoesntHave('downPayment') // no down payment
+            ->with(['reservedAmenities.amenity', 'bill']) // no need to load downPayment
+            ->get();
+
+        $reservationsWithFullyPaidBills = $customer->reservations()
+            ->where('status', 'verified')
+            ->whereHas('bill', function ($query) {
+                $query->where('status', 'paid');
+            })
+            ->with(['reservedAmenities.amenity', 'bill'])
+            ->get();
+
+        $reservationsWithPartialBills = $customer->reservations()
+            ->where('status', 'verified')
+            ->whereHas('bill', function ($query) {
+                $query->where('status', 'partially paid');
+            })
+            ->with(['reservedAmenities.amenity', 'bill'])
+            ->get();
+
+
+        $paidReservations = $reservationsWithFullyPaidBills->merge($reservationsWithPartialBills);
+
         $cancelledReservations = $allReservations->where('status', 'cancelled');
         $completedReservations = $allReservations->where('status', 'completed');
         $verifiedReservations = $allReservations->where('status', 'verified');
         $invalidReservations = $allReservations->where('status', 'invalid');
 
-        $currentReservations = $pendingReservations->merge($verifiedReservations);
+        $redReservations = $cancelledReservations->merge($invalidReservations);
+        $pendingReservations = $pendingReservationsWithDP->merge($pendingReservationsWithoutDP);
 
         return view('customer.reservation_records', compact(
             'customer',
             'pendingReservations',
-            'pendingReservationsWithDP',
             'cancelledReservations',
             'completedReservations',
             'invalidReservations',
-            'currentReservations',
-            'allReservations'
+            'allReservations',
+            'verifiedReservations',
+            'redReservations',
+            'paidReservations'
         ));
     }
 
@@ -197,31 +223,31 @@ class ReservationController extends Controller
         $date = $request->input('date');
         $startTime = $request->input('startTime');
         $endTime = $request->input('endTime');
-    
+
         // Fetch all reserved amenities for the given date and overlapping time range
         $reservedAmenities = ReservedAmenity::whereHas('reservation', function ($query) use ($date, $startTime, $endTime) {
             $query->where('date', $date)
-                  ->where(function ($query) use ($startTime, $endTime) {
-                      $query->whereBetween('startTime', [$startTime, $endTime])
-                            ->orWhereBetween('endTime', [$startTime, $endTime])
-                            ->orWhere(function ($query) use ($startTime, $endTime) {
-                                $query->where('startTime', '<=', $startTime)
-                                      ->where('endTime', '>=', $endTime);
-                            });
-                  });
+                ->where(function ($query) use ($startTime, $endTime) {
+                    $query->whereBetween('startTime', [$startTime, $endTime])
+                        ->orWhereBetween('endTime', [$startTime, $endTime])
+                        ->orWhere(function ($query) use ($startTime, $endTime) {
+                            $query->where('startTime', '<=', $startTime)
+                                ->where('endTime', '>=', $endTime);
+                        });
+                });
         })->pluck('amenity_id');
-    
+
         // Fetch available cottages and tables
         $availableCottages = Amenities::where('type', 'cottage')
             ->where('is_active', true)
             ->whereNotIn('id', $reservedAmenities)
             ->get();
-    
+
         $availableTables = Amenities::where('type', 'table')
             ->where('is_active', true)
             ->whereNotIn('id', $reservedAmenities)
             ->get();
-    
+
         return response()->json([
             'availableCottages' => $availableCottages,
             'availableTables' => $availableTables,
@@ -241,39 +267,39 @@ class ReservationController extends Controller
 
         return response()->json(['message' => 'Reservation already cancelled.'], 400);
     }
-    
+
     public function sendReminder(Request $request)
     {
         try {
             $request->validate([
                 'reservation_id' => 'required|exists:reservations,id',
             ]);
-    
+
             $reservation = Reservation::with(['customer', 'bill', 'downPayment'])->findOrFail($request->reservation_id);
-    
+
             if ($reservation->customer && $reservation->customer->email) {
                 // Format date and time
                 $reservation->formattedDate = Carbon::parse($reservation->date)->format('m-d-Y');
                 $reservation->formattedStartTime = Carbon::parse($reservation->startTime)->format('h:i A'); // 12-hour format
                 $reservation->formattedEndTime = Carbon::parse($reservation->endTime)->format('h:i A'); // 12-hour format
-    
+
                 // Calculate grandTotal, paidAmount, and balance
                 $grandTotal = optional($reservation->bill)->grand_total ?? 0;
-    
+
                 $paidAmount = DownPayment::where('res_num', $reservation->id)
                     ->where('status', 'verified')
                     ->sum('amount');
-    
+
                 $reservation->grandTotal = $grandTotal;
                 $reservation->paidAmount = $paidAmount;
                 $reservation->balance = $grandTotal - $paidAmount;
-    
+
                 // Send the email
                 Mail::to($reservation->customer->email)->send(new PaymentReminderMail($reservation));
-    
+
                 return response()->json(['message' => 'Reminder email sent successfully!']);
             }
-    
+
             return response()->json(['message' => 'Customer email not available.'], 400);
         } catch (\Exception $e) {
             return response()->json(['message' => 'An error occurred while sending the reminder.'], 500);

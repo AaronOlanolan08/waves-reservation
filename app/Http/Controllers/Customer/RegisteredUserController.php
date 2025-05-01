@@ -28,7 +28,7 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),  // Hash the password
         ]);
 
-        return redirect()->route('login');
+        return redirect()->route('login')->with('success', 'Sign Up Successful! You can now log in.');
     }
 
     protected function validator(array $data)
