@@ -60,132 +60,126 @@
         </script>
     </div>
 
-    <div class="content">
-        <div class="title-container">
-        <div class="content-card">
-            <div class="content-header">
-        <h2>Your Reservations</h2>
-
-        <div class="status-bar">
-            <span style="color: green;">● Verified</span>
-            <span style="color: orange;">● Pending</span>
-            <span style="color: red;">● Cancelled</span>
-            <span style="color: rgb(51, 51, 51);">● Past</span>
-            </div>
+    <div class="reservations-container">
+        <div class="content-header">
+            <h2>Your Reservations</h2>
+            <div class="status-tabs">
+                <button class="status-tab active" data-status="cancelled">Cancelled/Invalid</button>
+                <button class="status-tab" data-status="pending">Pending</button>
+                <button class="status-tab" data-status="current">Current</button>
+                <button class="status-tab" data-status="completed">Completed</button>
             </div>
             
-        <div class="reservations">
-            <div class="reservation-column">
-                <h4>Cancelled</h4>
-                @foreach ($cancelledReservations->sortBy(fn($reservation) => new DateTime($reservation->date . ' ' . $reservation->startTime)) as $reservation)
-                                @php
-                                    $date = new DateTime($reservation->date ?? now());
-                                    $startTime = new DateTime($reservation->startTime ?? '00:00:00');
-                                    $endTime = new DateTime($reservation->endTime ?? '00:00:00');
-                                    $statusColor = match ($reservation->status) {
-                                        'pending' => 'orange',
-                                        'verified' => 'green',
-                                        'invalid', 'cancelled' => 'red',
-                                        'completed' => 'gray',
-                                        default => 'black',
-                                    };
-                                @endphp
-                                <div class="reservation-item" data-id="{{ $reservation->id }}"
-                                    data-name="{{ $reservation->customer->name }}" data-paidAmount="{{ $reservation->paidAmount }}"
-                                    data-total="{{ $reservation->grandTotal }}" data-balance="{{ $reservation->balance }}"
-                                    data-date="{{ $reservation->date }}" data-start="{{ $reservation->startTime }}"
-                                    data-end="{{ $reservation->endTime }}" data-status="{{ $reservation->status }}"
-                                    style="border-left: 5px solid {{ $statusColor }}; cursor: pointer;">
-                                    <strong>#{{ $reservation->id }}</strong><br>
-                                    {{ $reservation->date }} | {{ $reservation->startTime }} - {{ $reservation->endTime }}
-                                </div>
+            <div class="status-legend">
+                <span class="legend-item" style="--color: blue;">Fully Paid</span>
+                <span class="legend-item" style="--color: lightgreen;"> Partially Paid</span>
+                <span class="legend-item" style="--color: orange;"> With Downpayment</span>
+                <span class="legend-item" style="--color: yellow;"> No Downpayment</span>
+                <span class="legend-item" style="--color: red;">Cancelled/Invalid</span>
+                <span class="legend-item" style="--color: rgb(51, 51, 51);">Past</span>
+            </div>
+        </div>
+    
+        <div class="reservations-content">
+            <!-- Cancelled/Invalid Reservations -->
+            <div class="reservation-list active" id="cancelled-reservations">
+            @foreach ($cancelledReservations->sortBy(fn($reservation) => new DateTime($reservation->date . ' ' . $reservation->startTime)) as $reservation)                <div class="reservation-item" data-id="{{ $reservation->id }}"
+                    data-name="{{ $reservation->customer->name }}" 
+                    data-paidAmount="{{ $reservation->paidAmount }}"
+                    data-total="{{ $reservation->grandTotal }}" 
+                    data-balance="{{ $reservation->balance }}"
+                    data-date="{{ $reservation->date }}" 
+                    data-start="{{ $reservation->startTime }}"
+                    data-end="{{ $reservation->endTime }}" 
+                    data-status="{{ $reservation->status }}"
+                    style="border-left: 5px solid red;">
+                    <div class="reservation-id">#{{ $reservation->id }}</div>
+                    <div class="reservation-date">{{ $reservation->date }}</div>
+                    <div class="reservation-time">{{ $reservation->startTime }} - {{ $reservation->endTime }}</div>
+                    <div class="reservation-name">{{ $reservation->customer->name }}</div>
+                    <div class="reservation-status cancelled">Cancelled</div>
+                </div>
                 @endforeach
             </div>
-
-            <div class="reservation-column">
-                <h4>Invalid</h4>
-                @foreach ($invalidReservations->sortBy(fn($reservation) => new DateTime($reservation->date . ' ' . $reservation->startTime)) as $reservation)
-                                @php
-                                    $date = new DateTime($reservation->date ?? now());
-                                    $startTime = new DateTime($reservation->startTime ?? '00:00:00');
-                                    $endTime = new DateTime($reservation->endTime ?? '00:00:00');
-                                    $statusColor = match ($reservation->status) {
-                                        'pending' => 'orange',
-                                        'verified' => 'green',
-                                        'invalid', 'cancelled' => 'red',
-                                        'completed' => 'gray',
-                                        default => 'black',
-                                    };
-                                @endphp
-                                <div class="reservation-item" data-id="{{ $reservation->id }}"
-                                    data-name="{{ $reservation->customer->name }}" data-paidAmount="{{ $reservation->paidAmount }}"
-                                    data-total="{{ $reservation->grandTotal }}" data-balance="{{ $reservation->balance }}"
-                                    data-date="{{ $reservation->date }}" data-start="{{ $reservation->startTime }}"
-                                    data-end="{{ $reservation->endTime }}" data-status="{{ $reservation->status }}"
-                                    style="border-left: 5px solid {{ $statusColor }}; cursor: pointer;">
-                                    <strong>#{{ $reservation->id }}</strong><br>
-                                    {{ $reservation->date }} | {{ $reservation->startTime }} - {{ $reservation->endTime }}
-                                </div>
+    
+            <!-- Pending Reservations -->
+            <div class="reservation-list" id="pending-reservations">
+                @foreach ($pendingReservations->sortBy(fn($reservation) => new DateTime($reservation->date . ' ' . $reservation->startTime)) as $reservation)
+                @php
+                    $statusColor = $reservation->downPayment ? 'orange' : 'yellow';
+                @endphp
+                <div class="reservation-item" data-id="{{ $reservation->id }}"
+                    data-name="{{ $reservation->customer->name }}" 
+                    data-paidAmount="{{ $reservation->paidAmount }}"
+                    data-total="{{ $reservation->grandTotal }}" 
+                    data-balance="{{ $reservation->balance }}"
+                    data-date="{{ $reservation->date }}" 
+                    data-start="{{ $reservation->startTime }}"
+                    data-end="{{ $reservation->endTime }}" 
+                    data-status="{{ $reservation->status }}"
+                    style="border-left: 5px solid {{ $statusColor }};">
+                    <div class="reservation-id">#{{ $reservation->id }}</div>
+                    <div class="reservation-date">{{ $reservation->date }}</div>
+                    <div class="reservation-time">{{ $reservation->startTime }} - {{ $reservation->endTime }}</div>
+                    <div class="reservation-name">{{ $reservation->customer->name }}</div>
+                    <div class="reservation-status pending">Pending</div>
+                </div>
                 @endforeach
             </div>
-
-            <div class="reservation-column">
-                <h4>Current</h4>
+            
+    
+            <!-- Current Reservations -->
+            <div class="reservation-list" id="current-reservations">
                 @foreach ($currentReservations->sortBy(fn($reservation) => new DateTime($reservation->date . ' ' . $reservation->startTime)) as $reservation)
-                                @php
-                                    $date = new DateTime($reservation->date ?? now());
-                                    $startTime = new DateTime($reservation->startTime ?? '00:00:00');
-                                    $endTime = new DateTime($reservation->endTime ?? '00:00:00');
-                                    $statusColor = match ($reservation->status) {
-                                        'pending' => 'orange',
-                                        'verified' => 'green',
-                                        'invalid', 'cancelled' => 'red',
-                                        'completed' => 'gray',
-                                        default => 'black',
-                                    };
-                                @endphp
-                                <div class="reservation-item" data-id="{{ $reservation->id }}"
-                                    data-name="{{ $reservation->customer->name }}" data-paidAmount="{{ $reservation->paidAmount }}"
-                                    data-total="{{ $reservation->grandTotal }}" data-balance="{{ $reservation->balance }}"
-                                    data-date="{{ $reservation->date }}" data-start="{{ $reservation->startTime }}"
-                                    data-end="{{ $reservation->endTime }}" data-status="{{ $reservation->status }}"
-                                    style="border-left: 5px solid {{ $statusColor }}; cursor: pointer;">
-                                    <strong>#{{ $reservation->id }}</strong><br>
-                                    {{ $reservation->date }} | {{ $reservation->startTime }} - {{ $reservation->endTime }}
-                                </div>
+                @php
+                    $statusColor = match ($reservation->bill->status) {
+                        'paid' => 'blue',
+                        'partially paid' => 'lightgreen',
+                    };
+                @endphp
+                <div class="reservation-item" data-id="{{ $reservation->id }}"
+                    data-name="{{ $reservation->customer->name }}" 
+                    data-paidAmount="{{ $reservation->paidAmount }}"
+                    data-total="{{ $reservation->grandTotal }}" 
+                    data-balance="{{ $reservation->balance }}"
+                    data-date="{{ $reservation->date }}" 
+                    data-start="{{ $reservation->startTime }}"
+                    data-end="{{ $reservation->endTime }}" 
+                    data-status="{{ $reservation->status }}"
+                    style="border-left: 5px solid {{ $statusColor }};">
+                    <div class="reservation-id">#{{ $reservation->id }}</div>
+                    <div class="reservation-date">{{ $reservation->date }}</div>
+                    <div class="reservation-time">{{ $reservation->startTime }} - {{ $reservation->endTime }}</div>
+                    <div class="reservation-name">{{ $reservation->customer->name }}</div>
+                    <div class="reservation-status current">Current</div>
+                </div>
                 @endforeach
             </div>
-
-            <div class="reservation-column">
-                <h4>Completed</h4>
+    
+            <!-- Completed Reservations -->
+            <div class="reservation-list" id="completed-reservations">
                 @foreach ($completedReservations->sortBy(fn($reservation) => new DateTime($reservation->date . ' ' . $reservation->startTime)) as $reservation)
-                                @php
-                                    $date = new DateTime($reservation->date ?? now());
-                                    $startTime = new DateTime($reservation->startTime ?? '00:00:00');
-                                    $endTime = new DateTime($reservation->endTime ?? '00:00:00');
-                                    $statusColor = match ($reservation->status) {
-                                        'pending' => 'orange',
-                                        'verified' => 'green',
-                                        'invalid', 'cancelled' => 'red',
-                                        'completed' => 'gray',
-                                        default => 'black',
-                                    };
-                                @endphp
-                                <div class="reservation-item" data-id="{{ $reservation->id }}"
-                                    data-name="{{ $reservation->customer->name }}" data-paidAmount="{{ $reservation->paidAmount }}"
-                                    data-total="{{ $reservation->grandTotal }}" data-balance="{{ $reservation->balance }}"
-                                    data-date="{{ $reservation->date }}" data-start="{{ $reservation->startTime }}"
-                                    data-end="{{ $reservation->endTime }}" data-status="{{ $reservation->status }}"
-                                    style="border-left: 5px solid {{ $statusColor }}; cursor: pointer;">
-                                    <strong>#{{ $reservation->id }}</strong><br>
-                                    {{ $reservation->date }} | {{ $reservation->startTime }} - {{ $reservation->endTime }}
-                                </div>
+                <div class="reservation-item" data-id="{{ $reservation->id }}"
+                    data-name="{{ $reservation->customer->name }}" 
+                    data-paidAmount="{{ $reservation->paidAmount }}"
+                    data-total="{{ $reservation->grandTotal }}" 
+                    data-balance="{{ $reservation->balance }}"
+                    data-date="{{ $reservation->date }}" 
+                    data-start="{{ $reservation->startTime }}"
+                    data-end="{{ $reservation->endTime }}" 
+                    data-status="{{ $reservation->status }}"
+                    style="border-left: 5px solid gray;">
+                    <div class="reservation-id">#{{ $reservation->id }}</div>
+                    <div class="reservation-date">{{ $reservation->date }}</div>
+                    <div class="reservation-time">{{ $reservation->startTime }} - {{ $reservation->endTime }}</div>
+                    <div class="reservation-name">{{ $reservation->customer->name }}</div>
+                    <div class="reservation-status completed">Completed</div>
+                </div>
                 @endforeach
             </div>
-
         </div>
     </div>
-</div>
+
 
 <section class="reservation-details hidden">
     <div class="reservation-container">
@@ -461,6 +455,70 @@
             }
         });
     });
+
+  // added Tab functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.status-tab');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs and content
+            document.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.reservation-list').forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Show corresponding content
+            const status = this.getAttribute('data-status');
+            document.getElementById(`${status}-reservations`).classList.add('active');
+        });
+    });
+    
+    // Optional: Add click handler for reservation items
+    const reservationItems = document.querySelectorAll('.reservation-item');
+    reservationItems.forEach(item => {
+        item.addEventListener('click', function() {
+            // Handle reservation item click (show details modal, etc.)
+            const reservationId = this.getAttribute('data-id');
+            console.log('Reservation clicked:', reservationId);
+            // You would implement your modal opening logic here
+        });
+    });
+});
+
+    // added Tab functionality
+    document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.status-tab');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            // Remove active class from all tabs and content
+            document.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.reservation-list').forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Show corresponding content
+            const status = this.getAttribute('data-status');
+            document.getElementById(`${status}-reservations`).classList.add('active');
+        });
+    });
+    
+    // Optional: Add click handler for reservation items
+    const reservationItems = document.querySelectorAll('.reservation-item');
+    reservationItems.forEach(item => {
+        item.addEventListener('click', function() {
+            // Handle reservation item click (show details modal, etc.)
+            const reservationId = this.getAttribute('data-id');
+            console.log('Reservation clicked:', reservationId);
+            // You would implement your modal opening logic here
+        });
+    });
+});
+
+
 
 
 </script>
