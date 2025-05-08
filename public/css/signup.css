@@ -25,7 +25,7 @@ body {
   width: 60%;
   text-align: center;
   max-width: 450px;
-  max-height: 450px;
+
 }
 
 .title-container {
@@ -55,15 +55,16 @@ body {
 form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
   text-align: left;
 }
 
 form>div {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
   align-items: center;
+  width: 100%;
 }
 
 label {
@@ -121,4 +122,48 @@ button:hover {
 .login-link:hover {
   text-decoration: underline;
   color: #003E80;
+}
+
+ 
+@media screen and (max-width: 768px) {
+  .container {
+    width: 95%;
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 9vw; /* scales based on viewport width */
+  }
+
+  .subtitle {
+    font-size: 5vw;
+    margin-top: -10px;
+    margin-bottom: 20px;
+  }
+
+  input,
+  button {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .container {
+    padding: 15px;
+  }
+
+  .title {
+    font-size: 10vw;
+  }
+
+  .subtitle {
+    font-size: 6vw;
+  }
+
+  input,
+  button {
+    font-size: 14px;
+    padding: 8px;
+  }
 }

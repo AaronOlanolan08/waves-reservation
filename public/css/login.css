@@ -128,3 +128,47 @@ button:hover {
   text-decoration: underline;
   color: #003E80;
 }
+
+
+@media screen and (max-width: 768px) {
+  .container {
+    width: 95%;
+    padding: 20px;
+  }
+
+  .title {
+    font-size: 9vw; /* scales based on viewport width */
+  }
+
+  .subtitle {
+    font-size: 5vw;
+    margin-top: -10px;
+    margin-bottom: 20px;
+  }
+
+  input,
+  button {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .container {
+    padding: 15px;
+  }
+
+  .title {
+    font-size: 10vw;
+  }
+
+  .subtitle {
+    font-size: 6vw;
+  }
+
+  input,
+  button {
+    font-size: 14px;
+    padding: 8px;
+  }
+}
