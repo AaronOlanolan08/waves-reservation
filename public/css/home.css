@@ -1,0 +1,272 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Merriweather', serif;
+}
+.all-content{
+  background: #f7f5f2;
+}
+html::-webkit-scrollbar-track{
+  background: transparent;
+}
+
+html::-webkit-scrollbar-thumb{
+  background: #f7f5f2;
+  ;
+  border-radius: 10px;
+}
+html::-webkit-scrollbar{
+  width: 10px;
+}
+/* navbar */
+
+#navbar{
+  display: flex;
+  height: 80px;
+  padding: 0;
+  background: linear-gradient(90deg, #7CB9BC 0%, #FEF5DB 100%);
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  
+  font-family: 'Poppins', sans-serif;
+
+}
+.logo img {
+  width: 100px;
+  height: auto;
+  display: block;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+
+
+.title {
+  font-family: 'Jaldi', sans-serif;
+  font-size: 33px;
+  letter-spacing: 0.12em;
+  color: #002147;
+  margin-right: 10px;
+}
+
+.sub-title {
+  font-family: 'Allura', cursive;
+  font-size: 32px;
+  font-weight: 100;
+  letter-spacing: 0.12em;
+  color: #000;
+  margin-left: 10px;
+  display: inline-block;
+  margin-left: 2px;
+  margin-top: 5px;
+}
+
+.navbar-nav{
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    font-size: 20px;
+    margin-left: 600px;
+
+    
+}
+.nav-item .nav-link{
+  color: black;
+  margin-left: 10px;
+  font-family: 'Jaldi', sans-serif;
+  transition: 0.5s;
+
+}
+.nav-item .nav-link:hover{
+  background: #f7f5f2;
+  border-radius: 5px;
+  color: black;
+}
+
+nav i {
+    font-family: 'Poppins', sans-serif;
+    font-size: 32px;
+    cursor: pointer;
+    color: #002147;
+}
+
+/* navbar */
+/* home content */
+#home{
+    width: 100%;
+    height: 90dvh;
+    background-image: linear-gradient(rgba(57, 56, 56, 0.3), rgba(0, 0, 0, 0.3)), url('/images/sum2.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 80%;
+    font-family: 'Roboto', sans-serif;
+
+    display: flex;
+    justify-content: center; /* Horizontal center */
+    align-items: center;     /* Vertical center */
+    text-align: center;  
+}
+.content{
+  padding: 0;
+  margin: 0;
+}
+.content h3{
+  font-size: 50px;
+  color: white;
+}
+.content p{
+  margin-top: 10px;
+  color: white;
+}
+#btn{
+  width: 150px;
+  height: 36px;
+  margin-top: 20px;
+  background: rgb(249, 249, 31);
+  border-radius: 5px;
+  font-weight: bold;
+  border: none;
+  transition: 0.5s ease;
+  cursor: pointer;
+}
+#btn:hover{
+  background: #f5f132;
+  color: white;
+}
+/* home content */
+
+
+
+
+
+
+/* about */
+#about{
+  width: 100%;
+  height: 100dvh;
+  background: #f7f5f2;
+  font-family: 'Roboto', sans-serif;
+}
+#about .container{
+ /* padding-top: 70px; */
+ padding: min(5em, 8%);
+
+
+}
+.heading{
+  text-align: center;
+  margin-bottom: 30px;
+  color: black;
+  font-size: clamp(1.8rem, 30px, 5rem);
+  font-weight: bold;
+}
+/*
+.heading span{
+  color: #6d99c5;
+} */
+ 
+#about .card{
+  border-radius: 10px;
+}
+#about .card img{
+  border-radius: 10px;
+  object-fit: contain;
+}
+/*
+.about h3{
+  font-weight: bold;
+ 
+} */
+
+@media screen and (max-width:982px){
+  #about p{
+    font-size: 8px;
+  }
+}
+@media screen and (max-width:766px){
+  #about p{
+    font-size: 15px;
+  }
+  #about{
+    height: 120vh;
+  }
+}
+/* about */
+
+
+/* top cards */
+.top-cards {
+  width: 100%;
+  background: #f7f5f2;
+  font-family: 'Roboto', sans-serif;
+}
+
+.heading2 {
+  color: black;
+  text-align: center;
+  font-size: clamp(1.8rem, 2.5vw, 3rem);
+  font-weight: bold;
+  margin-top: 2rem;      /* Add top spacing */
+  margin-bottom: 1rem;   /* Optional bottom spacing */
+  line-height: 1.2;      /* Prevent tight line spacing */
+}
+
+.heading2 span {
+  color: #6d99c5;
+}
+
+.top-cards .card {
+  border-radius: 10px;
+  transition: transform 0.5s ease;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.top-cards .card:hover {
+  transform: translateY(-10px);
+}
+
+.top-cards img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* Remove height media queries completely */
+
+
+
+/* footer */
+ html, body {
+    height: auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+     background: linear-gradient(270deg, rgba(249, 255, 223, 0.7) 0%, rgba(42, 100, 104, 0.7) 100%),
+                url('/images/Nature.png') no-repeat center center;
+    background-position: center;
+}
+
+body {
+    flex: 1;
+}
+
+
+.site-footer {
+    background: linear-gradient(90deg, #7CB9BC 0%, #FEF5DB 100%);
+    color: #002147;
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 60px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    position: relative;
+}
