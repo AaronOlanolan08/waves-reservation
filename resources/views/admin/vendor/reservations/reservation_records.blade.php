@@ -178,10 +178,11 @@
 						<strong><span class="reservation-name" id="name"></span></strong>
 						<span id="status" class="reservation-status"></span>
 					</p>
-
-					<p><span id="date"></span>
+					<p>
+					<span id="resID" class="font-bold"></span><br>
+					<span id="date"></span><br>
+					<span id="startTime"></span> - <span id="endTime"></span>
 					</p>
-					<p><span id="startTime"></span> - <span id="endTime"></span></p>
 					<ul id="modalAmenities"></ul>
 					<hr>
 					<p><strong id="grandTotal">Total: </strong>
@@ -254,6 +255,7 @@
 					const formattedStartTime = reservationStart ? formatTo12Hour(reservationStart) : '';
 					const formattedEndTime = reservationEnd ? formatTo12Hour(reservationEnd) : '';
 
+					document.getElementById("resID").textContent = reservationId || '';
 					document.getElementById("name").textContent = reservationName || '';
 					document.getElementById("date").textContent = reservationDate || '';
 					document.getElementById("grandTotal").textContent = `Total: ₱${reservationgrandTotal || 0}`;

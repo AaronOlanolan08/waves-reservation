@@ -72,6 +72,12 @@
           Tables
         </p>
       </div>
+
+      <div class="icon-container" id="cancel-tab">
+        <i class="material-icons side-icons">block</i>
+        <p class="icon-label">Cancelled</p>
+      </div>
+
     </nav>
 
     <!----------------------- MAIN SECTION  ---------------------------->
@@ -251,7 +257,7 @@
 
     cancelTab.addEventListener('click', () => {
       setActiveTab(cancelTab);
-      window.location.href = "{{ url('cancel') }}";
+      window.location.href = "{{ route('admin.vendor.cancel') }}";
     });
 
     function setActiveTab(activeTab) {

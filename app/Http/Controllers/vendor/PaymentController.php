@@ -19,7 +19,7 @@ class PaymentController extends Controller
     {
         $request->validate([
             'payment_amount' => 'required|numeric|min:0',
-            'reservation_id' => 'required|uuid',
+            'reservation_id' => 'required|string|regex:/^RES-\d{8}\d{3}$/', 
             'bill_id' => 'required|uuid',
             'status' => 'required|string|in:verified,invalid,completed',
         ]);

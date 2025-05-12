@@ -4,6 +4,7 @@ namespace App\Http\Controllers\vendor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\Reservation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Rules\UniqueEmailAcrossTables;
@@ -38,5 +39,11 @@ class VendorProfileController extends Controller
 
         // Flash success message
         return redirect()->route('admin.vendor.profile')->with('success', 'Profile updated successfully!');
+    }
+
+    public function showPaymentPage(Reservation $reservation)
+    {
+        $total = optional($reservation->bill)->grand_total ?? 0;
+        return view('admin.vendor.reservations.payment', compact('reservation', 'total'));
     }
 }

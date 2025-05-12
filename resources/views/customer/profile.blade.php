@@ -50,17 +50,18 @@
             </button>
         </aside>
 
-       <!--- MAIN CONTENT SECTION -->
-    <main class="profile-section">
-      <div class="profile-card">
-        <h2 class="profile-title">Your Profile</h2>
+        <!--- MAIN CONTENT SECTION -->
+        <main class="profile-section">
+            <div class="profile-card">
+                <h2 class="profile-title">Your Profile</h2>
 
-        <div class="profile-content">
-          <div class="profile-avatar">
-            <div class="avatar-circle">
-              <i class="fas fa-user"></i>
-            </div>
-          </div>
+                <div class="profile-content">
+                    <div class="profile-avatar">
+                        <div class="avatar-circle">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    
                     <div class="profile-details">
                         @if(session('success'))
                             <div style="text-xs color: green;">{{ session('success') }}</div>

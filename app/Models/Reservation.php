@@ -11,6 +11,7 @@ class Reservation extends Model
     public $incrementing = false;
     protected $keyType = 'string'; 
     protected $fillable = [
+        'id',
         'customer_id', 
         'date', 
         'startTime', 
@@ -20,16 +21,6 @@ class Reservation extends Model
 
     protected static function booted()
     {
-        static::creating(function ($reservation) {
-            if (empty($reservation->id)) {
-                $reservation->id = (string) Str::uuid();
-            }
-
-            if (empty($reservation->status)) {
-                $reservation->status = 'pending';
-            }
-        });
-
         static::retrieved(function ($reservation) {
             if ($reservation->isPastDate()) {
                 if ($reservation->areBillsPaid()) {
@@ -45,7 +36,7 @@ class Reservation extends Model
 
     public function isPastDate(): bool
     {
-        $reservationEnd = Carbon::parse($this->date.' '.$this->endTime);
+        $reservationEnd = Carbon::parse($this->date.' '.$this->endTime, 'Asia/Manila');
         return $reservationEnd->isPast();
     }
 

@@ -34,15 +34,14 @@
 
           <div class="start-end-time-container">
             <div>
-              <label for="start-time">Start Time:</label>
-              <input class="px-4 py-2" type="time" name="startTime" id="startTime" required>
+                <label for="startTime">Start Time</label>
+                <input type="time" id="startTime" name="startTime" min="07:00" max="21:00" required>
             </div>
             <div>
-              <label for="end-time">End Time:</label>
-              <input class="px-4 py-2" type="time" name="endTime" id="endTime" required>
+                <label for="endTime">End Time</label>
+                <input type="time" id="endTime" name="endTime" min="07:00" max="21:00" required>
             </div>
           </div>
-        </div>
 
 		  <div class="flex space-x-4 mb-4">
 
@@ -80,13 +79,16 @@
 									</label>
 								@endif
 						@endforeach
-               @endif
+                    @endif
 				</div>
 			</div>
-	  
 	  </div>
+      <!-- Error Message Container -->
+            <div id="error-message" class="text-red-600 text-sm mb-2 hidden"></div>
+                <!-- Error messages will be displayed here -->
+            </div>
         <div class="button-wrapper">
-          <button type="submit" class="payment-button">Proceed to payment</button>
+          <button type="submit" id="paymentButton" class="payment-button">Proceed to payment</button>
         </div>
       </form>
     </section>
@@ -98,22 +100,61 @@
         function validateSelection() {
             const cottages = document.querySelectorAll('input[name="cottages[]"]:checked');
             const tables = document.querySelectorAll('input[name="tables[]"]:checked');
+            const button = document.getElementById("paymentButton");
+            const errorMessageContainer = document.getElementById("error-message");
             const cottageChecked = cottages.length > 0;
             const tableChecked = tables.length > 0;
 
+            const startTime = document.getElementById("startTime").value;
+            const endTime = document.getElementById("endTime").value;
+            let errorMessages = [];
+
+            // Validate if start and end times are within the allowed range
+            if (startTime < "07:00" || startTime > "21:00") {
+                errorMessages.push("Start time must be between 07:00 AM and 09:00 PM.");
+            }
+
+            if (endTime < "07:00" || endTime > "21:00") {
+                errorMessages.push("End time must be between 07:00 AM and 09:00 PM.");
+            }
+
+            // Validate if end time is after start time
+            if (endTime <= startTime && endTime !== "") {
+                errorMessages.push("End time must be later than the start time.");
+            }
+
+            // If neither cottage nor table is selected
             if (!cottageChecked && !tableChecked) {
-                alert("Please select at least one Cottage or Table before submitting.");
+                errorMessages.push("Please select at least one Cottage or Table before submitting.");
+            }
+
+            // If there are any error messages, display them
+            if (errorMessages.length > 0) {
+                errorMessageContainer.style.display = "block"; // Show the error message container
+                errorMessageContainer.innerHTML = errorMessages.join("<br>"); // Display all error messages
                 return false; // Prevent form submission
             }
 
+            // 🔒 Disable the button to prevent multiple submissions
+            if (button) {
+                button.disabled = true;
+                button.textContent = "Processing..."; // Optional
+            }
+
+            // If no errors, hide the error message container
+            errorMessageContainer.style.display = "none";
             return true; // Allow form submission
         }
+
         document.addEventListener("DOMContentLoaded", function () {
             // Function to update the minimum date and start time dynamically
             function updateDateAndTime() {
+                // Adjust for (UTC +8)
                 const now = new Date();
-                const currentDate = now.toISOString().split('T')[0];
-                const currentTime = now.toTimeString().split(' ')[0].slice(0, 5); // Get current time in HH:MM format
+                const timezoneOffset = 8 * 60;
+                const localDate = new Date(now.getTime() + timezoneOffset * 60000);
+                const currentDate = localDate.toISOString().split('T')[0];
+                const currentTime = localDate.toTimeString().split(' ')[0].slice(0, 5); // Get current time in HH:MM format
 
                 // Update the minimum date to today
                 const dateInput = document.getElementById("date");
@@ -122,14 +163,6 @@
                 // If the selected date is in the past, reset it to today
                 if (!dateInput.value || dateInput.value < currentDate) {
                     dateInput.value = currentDate;
-                }
-
-                // Update the minimum start time if the selected date is today
-                const startTimeInput = document.getElementById("startTime");
-                if (dateInput.value === currentDate) {
-                    startTimeInput.setAttribute("min", currentTime);
-                } else {
-                    startTimeInput.removeAttribute("min"); // Remove restriction for future dates
                 }
             }
 
@@ -168,20 +201,6 @@
                         dropdownMenu.classList.add('hidden');
                     }
                 });
-            });
-
-            // Update minimum end time based on selected start time
-            document.getElementById("startTime").addEventListener("change", function () {
-                let startTime = this.value;
-                document.getElementById("endTime").setAttribute("min", startTime);
-
-                // Fetch updated amenities based on the new start and end times
-                fetchAvailableAmenities(getSelectedDate(), getStartTime(), getEndTime());
-            });
-
-            document.getElementById("endTime").addEventListener("change", function () {
-                // Fetch updated amenities based on the new end time
-                fetchAvailableAmenities(getSelectedDate(), getStartTime(), getEndTime());
             });
 
             // Fetch and update available amenities when a date is selected

@@ -9,7 +9,7 @@ use App\Models\Balance;
 use App\Models\Bill;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
+use App\Models\ReservedAmenity;
 
 class DownpaymentController extends Controller
 {
@@ -50,7 +50,6 @@ class DownpaymentController extends Controller
             'payment_proof' => 'required|image|max:2048',
         ]);
 
-        // Get the reservation with its bill
         $reservation = Reservation::with('reservedAmenities.amenity', 'bill')->findOrFail($reservationId);
         $bill = $reservation->bill;
 
@@ -58,8 +57,42 @@ class DownpaymentController extends Controller
             return back()->withErrors(['bill' => 'No billing information found. Please contact support.']);
         }
 
+        $date = $reservation->date;
+        $startTime = $reservation->startTime;
+        $endTime = $reservation->endTime;
 
-        // Store the uploaded image proof
+        // Get amenity IDs selected in this reservation
+        $amenityIds = $reservation->reservedAmenities->pluck('amenity_id');
+
+        // Check for conflicting amenities with existing downpayment on same date and time
+        $conflictingAmenities = [];
+        foreach ($reservation->reservedAmenities as $reservedAmenity) {
+            $conflict = ReservedAmenity::where('amenity_id', $reservedAmenity->amenity_id)
+                ->whereHas('reservation', function ($query) use ($reservation) {
+                    $query->where('date', $reservation->date)
+                        ->where('startTime', '<', $reservation->endTime)
+                        ->where('endTime', '>', $reservation->startTime)
+                        ->where('id', '!=', $reservation->id);
+                })
+                ->whereHas('reservation.downpayment', function ($query) {
+                    $query->whereIn('status', ['pending', 'verified']);
+                })
+                ->with('amenity')
+                ->first();
+
+            if ($conflict) {
+                $conflictingAmenities[] = $reservedAmenity->amenity->name;
+            }
+        }
+
+        if (!empty($conflictingAmenities)) {
+            return back()->withErrors([
+                'conflict' => 'The following amenities are already reserved with downpayments on this date and time: ' .
+                    implode(', ', $conflictingAmenities)
+            ]);
+        }
+
+        // Store uploaded image proof
         $imagePath = $request->file('payment_proof')->store('proofs', 'public');
 
         // Create the new downpayment
@@ -75,7 +108,7 @@ class DownpaymentController extends Controller
             'verified_by' => null,
         ]);
 
-        // Update or create the balance record
+        // Update or create balance record
         $existingBalance = Balance::where('bill_id', $bill->id)->first();
 
         if ($existingBalance) {
@@ -86,4 +119,5 @@ class DownpaymentController extends Controller
 
         return redirect()->route('customer.reservation')->with('success', 'Downpayment submitted successfully!');
     }
+
 }

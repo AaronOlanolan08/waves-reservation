@@ -69,24 +69,22 @@
    <div class="profile-content">
       <div class="balance-container">
             <div class="balance-card">
-               <div class="balance-header">
-                  <h2>Payment Details</h2>
-                  @php
-                  $total = optional($reservation->bill)->grand_total ?? 0;
-                  $downpayment = $total * 0.5;
-                  @endphp
-
-            @if ($errors->any())
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    <ul class="list-disc pl-5 space-y-1">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+                <div class="balance-header">
+                    <h2>Payment Details</h2>
+                    @php
+                    $total = optional($reservation->bill)->grand_total ?? 0;
+                    $downpayment = $total * 0.5;
+                    @endphp
                 </div>
-            @endif
-               </div>
-               
+                @if ($errors->any())
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                            <ul class="list-disc list-none pl-5 space-y-1">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                <div class="balance-content">
                   <div class="payment-summary">
                      <div class="w-full bg-gray-50 border border-gray-200 border-dashed rounded-lg p-4">

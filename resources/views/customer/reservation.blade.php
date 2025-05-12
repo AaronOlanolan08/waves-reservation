@@ -148,13 +148,18 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+        const now = new Date();
+        const timezoneOffset = 8 * 60; // UTC +8
+        const localDate = new Date(now.getTime() + timezoneOffset * 60000);
+        const currentDate = localDate.toISOString().split('T')[0];
+
         // Set the minimum date to today for the date input field
-        let today = new Date().toISOString().split('T')[0];
-        document.getElementById("date").setAttribute("min", today);
-        document.getElementById("date").value = today;
+        const dateInput = document.getElementById("date");
+        dateInput.setAttribute("min", currentDate);
+        dateInput.value = currentDate;
 
         // Fetch and update available amenities for the default date (today)
-        fetchAvailableAmenities(today, getStartTime(), getEndTime());
+        fetchAvailableAmenities(currentDate, getStartTime(), getEndTime());
 
         // Handle dropdown visibility
         document.querySelectorAll('.dropdown-btn').forEach(function (btn) {

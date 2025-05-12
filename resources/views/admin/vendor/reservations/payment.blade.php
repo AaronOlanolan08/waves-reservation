@@ -76,15 +76,17 @@
                  </div>
                   
                   <div class="payment-methods">
-                     <form class="payment-instructions" action="{{ route('admin.vendor.process-payment')}}" method="POST" enctype="multipart/form-data">
+                     <form class="payment-instructions" action="{{ route('admin.vendor.process-payment')}}" method="POST" enctype="multipart/form-data" onsubmit="return validateSelection()">
                         @csrf
                            <input type="hidden" name="reservation_id" value="{{ $reservation->id }}">
                             <input type="hidden" name="bill_id" value="{{ optional($reservation->bill)->id }}">
                             <input type="hidden" name="status" value="verified" hidden>
 
-                            <label for="payment_amount" class="upload-instruction ms-2 my-3">Enter Payment Amount:</label>
+                            <label for="payment_amount" class="upload-instruction my-3">Enter Payment Amount:</label>
                             <input type="number" name="payment_amount" id="payment_amount" class="w-full border border-gray-300 rounded px-3 py-2" required>
-
+                            <div id="error-message" class="text-red-600 text-sm mb-2 hidden"></div>
+                              <!-- Error messages will be displayed here -->
+                           </div>
                         <div class="button-container mt-4">
                             <button class="pay-button" type="submit" id="pay-button">
                                 <i class="fas fa-check"></i> Pay Now
@@ -98,3 +100,34 @@
    </div>
 @endsection
 
+@section('scripts')
+<script>
+    function validateSelection() {
+        const paymentAmount = document.getElementById('payment_amount').value;
+        const button = document.getElementById("pay-button");
+        const errorMessageContainer = document.getElementById("error-message");
+        const total = {{ $total }};
+        const downpayment = total * 0.5;
+        let errorMessages = [];
+
+        if (parseFloat(paymentAmount) < downpayment) {
+            errorMessages.push('Payment amount must be at least 50% of the total.');
+        }
+
+        // 🔒 Disable the button to prevent multiple submissions
+         if (button) {
+               button.disabled = true;
+               button.textContent = "Processing..."; // Optional
+         }
+         
+         if (errorMessages.length > 0) {
+            errorMessageContainer.style.display = "block";
+            errorMessageContainer.innerHTML = errorMessages.join("<br>");
+            return false;
+         }
+
+         errorMessageContainer.style.display = "none";
+         return true;
+    }
+</script>
+@endsection

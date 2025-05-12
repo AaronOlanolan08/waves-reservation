@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ReservationRecordController extends Controller
 {
@@ -246,7 +247,7 @@ class ReservationRecordController extends Controller
         }
     }
 
-    public function create_walkIn(Request $request)
+    public function amenitiesAvailability(Request $request)
     {
         // Fetch only active cottages and tables
         $cottages = Amenities::where('type', 'cottage')->where('is_active', 1)->get();
@@ -259,7 +260,12 @@ class ReservationRecordController extends Controller
             // Get all reserved amenities for the selected date
             $reservedCottages = ReservedAmenity::join('reservations', 'reserved_amenity.res_num', '=', 'reservations.id')
                 ->where('reservations.date', $date)
-                ->where('reservations.status', '!=', 'cancelled') // Make sure we are only considering active reservations
+                 ->where(function ($q) {
+                    $q->where('reservations.status', 'verified')
+                    ->orWhereHas('downPayment', function ($q2) {
+                        $q2->whereIn('status', ['verified', 'pending']);
+                    });
+                })
                 ->whereHas('amenity', function ($query) {
                     $query->where('type', 'cottage');
                 })
@@ -268,7 +274,12 @@ class ReservationRecordController extends Controller
 
             $reservedTables = ReservedAmenity::join('reservations', 'reserved_amenity.res_num', '=', 'reservations.id')
                 ->where('reservations.date', $date)
-                ->where('reservations.status', '!=', 'cancelled')
+                ->where(function ($q) {
+                    $q->where('reservations.status', 'verified')
+                    ->orWhereHas('downPayment', function ($q2) {
+                        $q2->whereIn('status', ['verified', 'pending']);
+                    });
+                })
                 ->whereHas('amenity', function ($query) {
                     $query->where('type', 'table');
                 })
@@ -309,9 +320,29 @@ class ReservationRecordController extends Controller
             ]
         );
 
+        $currentDate = Carbon::now('Asia/Manila')->format('Ymd');
+
+        // Find latest reservation ID that starts with today's date
+        $latestReservation = DB::table('reservations')
+            ->where('id', 'like', "RES-{$currentDate}%")
+            ->orderByDesc('id')
+            ->first();
+
+        // Get next increment number
+        $nextNumber = 1;
+        if ($latestReservation) {
+            // Extract the last 3 digits from the ID
+            $lastId = $latestReservation->id;
+            $lastNumber = (int) substr($lastId, -3);  // Last 3 digits
+            $nextNumber = $lastNumber + 1;
+        }
+
+        // Format new ID like RES-20250510001
+        $newId = 'RES-' . $currentDate . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+
         // Create the reservation
         $reservation = Reservation::create([
-            'id' => Str::uuid(),
+            'id' => $newId,
             'customer_id' => $customer->id,
             'date' => $request->date,
             'startTime' => Carbon::parse($request->startTime)->format('H:i:s'),
@@ -371,12 +402,6 @@ class ReservationRecordController extends Controller
             'status' => 'unpaid',
         ]);
 
-        return view('admin.vendor.reservations.payment', compact('reservation', 'total'));
-    }
-
-    public function payment_show($id)
-    {
-        $reservation = Reservation::with(['customer', 'reserved_amenities.amenity', 'bill'])->findOrFail($id);
-        return view('admin.vendor.reservations.payment', compact('reservation'));
+        return redirect()->route('vendor.payment.page', ['reservation' => $reservation->id]);
     }
 }

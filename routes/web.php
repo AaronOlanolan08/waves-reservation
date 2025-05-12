@@ -37,10 +37,10 @@ Route::middleware('auth')->group(function () {
         ->name('customer.dashboard');
     Route::get('customer/reservation', [ReservationController::class, 'create'])
         ->name('customer.reservation');
-    Route::post('customer/reservation/store', [ReservationController::class, 'store'])
+    Route::post('customer/reservation/store', [ReservationController::class, 'createReservation'])
         ->middleware('auth')
         ->name('reservation.store');
-    Route::post('customer/dashboard/reserve', [ReservationController::class, 'store'])
+    Route::post('customer/dashboard/reserve', [ReservationController::class, 'createReservation'])
         ->name('customer.reserve');
     Route::get('customer/profile', [ProfileController::class, 'view_profile'])
         ->name('customer.profile');
@@ -58,7 +58,7 @@ Route::middleware('auth')->group(function () {
         ->name('profile.delete');
     Route::get('customer/reservation-records/edit-amenities', [ReservationController::class, 'edit_amenities']);
     Route::post('/customer/update-reservation', [ReservationController::class, 'updateReservation'])
-    ->name('customer.updateReservation');
+        ->name('customer.updateReservation');
 
 });
 
@@ -66,7 +66,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/downpayment/{reservation}', [DownpaymentController::class, 'showReceipt'])
         ->name('downpayment.show');
-        Route::get('/payment/{reservation}', [DownpaymentController::class, 'billing'])
+    Route::get('/payment/{reservation}', [DownpaymentController::class, 'billing'])
         ->name('payment.show');
     Route::post('/downpayment/{reservation}', [DownpaymentController::class, 'storePayment'])
         ->name('downpayment.store');
@@ -133,16 +133,20 @@ Route::middleware(VendorMiddleware::class)->group(function () {
         ->name('admin.vendor.invalid-payment');
     Route::get('admin/vendor/edit-reservations', [ReservationRecordController::class, 'view_edit_reservations'])
         ->name('admin.vendor.edit-res-req');
-    Route::get('/admin/vendor/walk-in', [ReservationRecordController::class, 'create_walkIn'])
+    Route::get('/admin/vendor/walk-in', [ReservationRecordController::class, 'amenitiesAvailability'])
         ->name('admin.vendor.walk_in');
     Route::post('/admin/vendor/walk-in', [ReservationRecordController::class, 'custom_walkIn'])
         ->name('admin.vendor.walk_in.store');
-    Route::get('admin/vendor/payment/{reservation}', [ReservationRecordController::class, 'payment_show'])
-        ->name('admin.vendor.reservations.payment.show');
+    Route::get('/vendor/reservation/payment/{reservation}', [VendorProfileController::class, 'showPaymentPage'])
+    ->name('vendor.payment.page');
     Route::get('admin/vendor/profile', [VendorProfileController::class, 'view_profile'])
         ->name('admin.vendor.profile');
     Route::get('admin/vendor/profile/{id}/edit', [VendorProfileController::class, 'edit_profile'])
         ->name('admin.vendor.profile.edit');
     Route::patch('admin/vendor/profile/{id}/update', [VendorProfileController::class, 'update_profile'])
         ->name('admin.vendor.profile.update');
+    Route::get('admin/vendor/cancel', [AmenitiesController::class, 'showCancelledAmenities'])
+        ->name('admin.vendor.cancel');
+    Route::post('admin/vendor/activate-amenity', [AmenitiesController::class, 'activateAmenity'])
+        ->name('admin.vendor.activate');
 });

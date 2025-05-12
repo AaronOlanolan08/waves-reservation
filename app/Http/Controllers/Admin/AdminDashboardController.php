@@ -8,9 +8,10 @@ use App\Models\Admin;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 use App\Models\DownPayment;
 use App\Models\Reservation;
+use App\Models\Bill;
 
 class AdminDashboardController extends Controller
 {
@@ -22,7 +23,71 @@ class AdminDashboardController extends Controller
 
     public function create()
     {
-        return view('admin.dashboard');
+        $currentMonth = Carbon::now()->month;
+
+        // Revenue for current month
+        $revenue = Bill::whereIn('status', ['paid', 'partially_paid'])
+            ->whereMonth('date', $currentMonth)
+            ->sum('grand_total');
+
+        // Reservation counts
+        $completedReservations = Reservation::where('status', 'completed')
+            ->whereMonth('date', $currentMonth)
+            ->count();
+        $pendingReservations = Reservation::where('status', 'pending')
+            ->whereMonth('date', $currentMonth)
+            ->count();
+        $verifiedReservations = Reservation::where('status', 'verified')
+            ->whereMonth('date', $currentMonth)
+            ->count();
+
+        // Monthly revenue for line chart
+        $monthlyRevenue = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $monthlyRevenue[] = Bill::whereIn('status', ['paid', 'partially_paid'])
+                ->whereMonth('date', $month)
+                ->sum('grand_total');
+        }
+
+        $monthlyLabels = [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec'
+        ];
+
+        $monthlyRevenue = [];
+        $annualRevenue = 0;
+
+        for ($month = 1; $month <= 12; $month++) {
+            $monthlySum = Bill::whereIn('status', ['paid', 'partially_paid'])
+                ->whereMonth('date', $month)
+                ->sum('grand_total');
+            $monthlyRevenue[] = $monthlySum;
+            $annualRevenue += $monthlySum;
+        }
+
+        $averageMonthlyRevenue = $currentMonth > 0 ? $annualRevenue / $currentMonth : 0;
+
+        return view('admin.dashboard', compact(
+            'revenue',
+            'completedReservations',
+            'pendingReservations',
+            'verifiedReservations',
+            'monthlyRevenue',
+            'monthlyLabels',
+            'annualRevenue',
+            'averageMonthlyRevenue'
+        ));
+
     }
 
     public function store(Request $request)
@@ -38,7 +103,7 @@ class AdminDashboardController extends Controller
             'role' => $request->role,
         ]);
 
-        return redirect()->back()->with('success', 'Account created successfully.');        
+        return redirect()->back()->with('success', 'Account created successfully.');
     }
 
 
