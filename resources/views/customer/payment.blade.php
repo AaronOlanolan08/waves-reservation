@@ -65,7 +65,7 @@
         </script>
     </div>
 
-<div class="content">       
+<div class="main">       
    <div class="profile-content">
       <div class="balance-container">
             <div class="balance-card">

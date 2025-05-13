@@ -43,12 +43,11 @@
         <li class="nav-item">
     @guest
         <!-- If the user is not logged in, redirect to login page -->
-        <a class="nav-link" href="{{ route('login') }}">Book</a>
+        <a class="nav-link" href="{{ route('reservation') }}">Book</a>
     @endguest
 
     @auth
-        <!-- If the user is logged in, redirect to reservation page -->
-        <a class="nav-link" href="{{ route('reservation') }}">Book</a>
+      
     @endauth
 </li>
 
