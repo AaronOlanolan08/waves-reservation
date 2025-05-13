@@ -205,49 +205,54 @@ a {
   text-decoration: none;
 }
 
-.reservations-container{
+.reservations-container {
   display: flex;
-    justify-content: space-between; 
-    align-items: stretch;
-    padding:10px;
-    border-radius: 5px;
-    height: 100vh;
-    width: 95;
-    background-color: #263b49;
-
-    
+  justify-content: space-between;
+  align-items: stretch;
+  padding: 10px;
+  border-radius: 5px;
+  height: 100vh;
+  width: 95vw; /* FIXED: added unit */
+  background-color: #263b49;
+  overflow-x: auto; /* Optional: allows horizontal scroll if needed */
+  gap: 20px; /* Adds spacing between columns */
 }
 
 .reservation-column {
-    flex: 1;
-    max-width: 300px;
-    min-width: 370px;
-    height: auto;
-    border: 2px solid #263b49;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    justify-content: flex-start;
-    background-color: white;
+  flex: 1;
+  max-width: 300px;
+  min-width: 280px; /* Reduced min-width to avoid overflow */
+  height: auto;
+  border: 2px solid #263b49;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  justify-content: flex-start;
+  background-color: white;
+  box-sizing: border-box; /* ensures padding doesn’t increase size */
 }
-.reservation-column h4 {
-    text-align: center;
-    color: #000; 
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
-.reservation-item {
-    background: #cdced0;
-  color: #000; 
-    padding: 10px;
-    border-radius: 5px;
-    margin-top: 10px;
-    font-size: 14px;
-    line-height: 1.4;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 
+.reservation-column h4 {
+  text-align: center;
+  color: #000;
+  font-size: 18px;
+  margin-bottom: 10px;
 }
+
+.reservation-item {
+  background: #cdced0;
+  color: #000;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.4;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100%; /* Ensures it doesn't overflow column */
+  box-sizing: border-box;
+}
+
 .reservation-item.cancelled {
     border-left: 4px solid red;
   }

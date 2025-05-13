@@ -47,7 +47,8 @@
     @endguest
 
     @auth
-      
+        <!-- If the user is logged in, redirect to reservation page -->
+        <a class="nav-link" href="{{ route('customer.reservation') }}">Book</a>
     @endauth
 </li>
 

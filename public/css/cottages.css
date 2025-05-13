@@ -223,8 +223,16 @@ td {
 }
 .edit-icon {
   color: #002044;
+  cursor: pointer; /* indicates it's clickable */
+  transition: color 0.2s ease, transform 0.2s ease;
 }
-.archive-button {
+
+.edit-icon:hover {
+  color: #0056b3; /* darker shade for hover */
+  transform: scale(1.1); /* slightly enlarge the icon */
+}
+
+.archive-button, .unarchive-button {
   border: none;
   background-color: #002044;
   color: white;
@@ -246,23 +254,40 @@ td {
 }
 
 .modal {
-  height: 25vh;
+  height: 60vh; /* Increased from 25vh */
   width: 30vw;
-
   border: none;
   border-radius: 12px;
 }
+
 .modal-wrapper {
   height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: space-evenly;
+  justify-content: space-between; /* Ensures spacing is distributed */
+  padding: 20px; /* Add some internal padding */
 }
+
 .modal-heading {
   font: 700 18px poppins;
+  margin-bottom: 10px;
 }
+
+.modal-wrapper form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Space between form elements */
+}
+
+.modal-wrapper .flex {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;           /* space between buttons */
+  margin-bottom: 10px; /* space below the buttons */
+}
+
 .modal-text {
   font: 400 16px poppins;
   padding: 6px 30px 12px 30px;

@@ -20,9 +20,8 @@
             <h1 class="title">WAVES <span>Resort</span></h1>
         </div>
         <nav>
-            <a href="#">Home</a>
-            <a href="#">About</a>
-            <a href="#">Book</a>
+            <a href="{{ route('customer.about') }}">About</a>
+            <a href="{{ route('customer.reservation') }}">Book</a>
 
             <div class="profile-container">
                 <a href="{{ route('customer.profile') }}">

@@ -253,11 +253,13 @@ table {
 .card h3 {
   margin-bottom: 1rem;
   font-size: 1.5rem;
+  font-family: poppins;
 }
 
 .card .amount {
   font-size: 2rem;
   font-weight: 600;
+  font-family: poppins;
 }
 
 .reservations-section {

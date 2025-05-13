@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Log;
 
 class ReservationController extends Controller
 {
-    public function updateReservation(Request $request) 
+    public function updateReservation(Request $request)
     {
         // Step 1: Validate request
         $request->validate([
@@ -49,9 +49,9 @@ class ReservationController extends Controller
             ->where('reservations.date', $date)
             ->where(function ($q) {
                 $q->where('reservations.status', 'verified')
-                ->orWhereHas('downPayment', function ($q2) {
-                    $q2->whereIn('status', ['verified', 'pending']);
-                });
+                    ->orWhereHas('downPayment', function ($q2) {
+                        $q2->whereIn('status', ['verified', 'pending']);
+                    });
             })
             ->where(function ($query) use ($startTime, $endTime) {
                 $query->where('reservations.starttime', '<', $endTime)
@@ -67,9 +67,9 @@ class ReservationController extends Controller
         if (!empty($conflicts)) {
             // Get the names of the conflicted amenities
             $conflictedAmenities = Amenities::whereIn('id', $conflicts)->pluck('name')->toArray();
-    
+
             return redirect()->back()
-            ->withErrors(['conflict' => 'The following amenities are already reserved during the selected date and time: ' . implode(', ', $conflictedAmenities)])
+                ->withErrors(['conflict' => 'The following amenities are already reserved during the selected date and time: ' . implode(', ', $conflictedAmenities)])
                 ->withInput();
         }
 
@@ -447,48 +447,48 @@ class ReservationController extends Controller
         ));
     }
 
-  public function checkAvailability(Request $request)
-{
-    $date = $request->input('date');
-    $startTime = $request->input('startTime');
-    $endTime = $request->input('endTime');
+    public function checkAvailability(Request $request)
+    {
+        $date = $request->input('date');
+        $startTime = $request->input('startTime');
+        $endTime = $request->input('endTime');
 
-    // Fetch reserved amenities from verified reservations with downPayment status pending or verified
-    $reservedAmenities = ReservedAmenity::whereHas('reservation', function ($query) use ($date, $startTime, $endTime) {
-    $query->where('reservations.date', $date)
-        ->where(function ($q) {
-            $q->where('reservations.status', 'verified')
-            ->orWhereHas('downPayment', function ($q2) {
-                $q2->whereIn('status', ['verified', 'pending']);
-            });
-        })
-        ->where(function ($query) use ($startTime, $endTime) {
-            $query->whereBetween('reservations.startTime', [$startTime, $endTime])
-                ->orWhereBetween('reservations.endTime', [$startTime, $endTime])
-                ->orWhere(function ($query) use ($startTime, $endTime) {
-                    $query->where('reservations.startTime', '<=', $startTime)
-                            ->where('reservations.endTime', '>=', $endTime);
-            });
-        });
-    })->pluck('amenity_id');
+        // Fetch reserved amenities from verified reservations with downPayment status pending or verified
+        $reservedAmenities = ReservedAmenity::whereHas('reservation', function ($query) use ($date, $startTime, $endTime) {
+            $query->where('reservations.date', $date)
+                ->where(function ($q) {
+                    $q->where('reservations.status', 'verified')
+                        ->orWhereHas('downPayment', function ($q2) {
+                            $q2->whereIn('status', ['verified', 'pending']);
+                        });
+                })
+                ->where(function ($query) use ($startTime, $endTime) {
+                    $query->whereBetween('reservations.startTime', [$startTime, $endTime])
+                        ->orWhereBetween('reservations.endTime', [$startTime, $endTime])
+                        ->orWhere(function ($query) use ($startTime, $endTime) {
+                            $query->where('reservations.startTime', '<=', $startTime)
+                                ->where('reservations.endTime', '>=', $endTime);
+                        });
+                });
+        })->pluck('amenity_id');
 
 
-    // Fetch available cottages and tables (not among reserved and still active)
-    $availableCottages = Amenities::where('type', 'cottage')
-        ->where('is_active', true)
-        ->whereNotIn('id', $reservedAmenities)
-        ->get();
+        // Fetch available cottages and tables (not among reserved and still active)
+        $availableCottages = Amenities::where('type', 'cottage')
+            ->where('is_active', true)
+            ->whereNotIn('id', $reservedAmenities)
+            ->get();
 
-    $availableTables = Amenities::where('type', 'table')
-        ->where('is_active', true)
-        ->whereNotIn('id', $reservedAmenities)
-        ->get();
+        $availableTables = Amenities::where('type', 'table')
+            ->where('is_active', true)
+            ->whereNotIn('id', $reservedAmenities)
+            ->get();
 
-    return response()->json([
-        'availableCottages' => $availableCottages,
-        'availableTables' => $availableTables,
-    ]);
-}
+        return response()->json([
+            'availableCottages' => $availableCottages,
+            'availableTables' => $availableTables,
+        ]);
+    }
 
     public function cancel_reservation(Request $request, $reservationId)
     {
@@ -539,5 +539,10 @@ class ReservationController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'An error occurred while sending the reminder.'], 500);
         }
+    }
+
+    public function about()
+    {
+        return view('customer.about');
     }
 }
